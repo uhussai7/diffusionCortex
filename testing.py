@@ -3,12 +3,12 @@ import numpy as np
 import igl.pyigl
 import nibabel
 
-pial=meshes.surface()
+pial=meshes.Surface()
 
 pial.getSurf(subject="101006", hemi="lh", surf="pial")
 pial.getAparc(subject="101006", hemi="lh")
 
-someGyrus = meshes.gyrus()
+someGyrus = meshes.Gyrus()
 someGyrus.getGyrus(pial, 1)
 
 #nibabel.freesurfer.io.write_geometry('test',someGyrus.coords,someGyrus.faces)
