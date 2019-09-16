@@ -29,7 +29,6 @@ class Gyrus:
         inds = inds[0][:]
         self.vertices = [Vertex() for ind in inds]
         f=0
-        ids_in_face=[0,0,0]
         for i in range(inds.shape[0]):
             #print(i)
             #print(inds[i])
@@ -38,33 +37,21 @@ class Gyrus:
             faceids=surface.vertices[ind].faces
             for faceid in faceids:
                 vert_ids_in_face = surface.faces[faceid].vertex_ids
-                print('a face with id ',faceid)
+                #print('a face with id ',faceid)
                 if (set(vert_ids_in_face) & set(inds)) == set(vert_ids_in_face):
-                    #self.faces.append(Face())
-                    #for vert_id_in_face in vert_ids_in_face:
+                    ids_in_face = np.array([0, 0, 0])
                     for k in range(3):
-                        print("k=",k)
+                        #print("k=",k)
                         ind_in_face=np.where(inds == vert_ids_in_face[k])
                         ind_in_face=ind_in_face[0][0]
-                        print(ind_in_face)
+                        #print(ind_in_face)
                         self.vertices[ind_in_face].faces.append(f)
-                        #self.faces[f].vertex_ids.append(ind_in_face)
                         surface.vertices[vert_ids_in_face[k]].faces.remove(faceid)
                         ids_in_face[k]=ind_in_face
                     f=f+1
-                    print(ids_in_face)
+                    #print(ids_in_face)
                     self.faces.append(Face(vertex_ids=ids_in_face))
-                    print("f=",f)
-
-
-
-
-         #coords = surface.coords[inds]
-    #     for face in surface.faces:
-    #         if (bool(set(face) & set(inds[0][:]))):
-    #             self.faces.append(face)
-    #     self.coords=np.asarray(self.coords)
-    #     self.faces=np.asarray(self.faces)
+                    #print("f=",f)
 
 class Surface:
     def __init__(self):
