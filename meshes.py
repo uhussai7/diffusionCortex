@@ -6,8 +6,8 @@ class Face:
         self.vertex_ids = vertex_ids
 
 class Vertex:
-    def __init__(self):
-        self.coords = []
+    def __init__(self,coords=None):
+        self.coords = coords
         self.faces = []
 
 
@@ -30,28 +30,23 @@ class Gyrus:
         self.vertices = [Vertex() for ind in inds]
         f=0
         for i in range(inds.shape[0]):
-            #print(i)
-            #print(inds[i])
             ind=inds[i]
             self.vertices[i].coords = surface.vertices[ind].coords
-            faceids=surface.vertices[ind].faces
+            faceids= surface.vertices[ind].faces
             for faceid in faceids:
                 vert_ids_in_face = surface.faces[faceid].vertex_ids
-                #print('a face with id ',faceid)
                 if (set(vert_ids_in_face) & set(inds)) == set(vert_ids_in_face):
                     ids_in_face = np.array([0, 0, 0])
                     for k in range(3):
-                        #print("k=",k)
                         ind_in_face=np.where(inds == vert_ids_in_face[k])
                         ind_in_face=ind_in_face[0][0]
-                        #print(ind_in_face)
                         self.vertices[ind_in_face].faces.append(f)
-                        surface.vertices[vert_ids_in_face[k]].faces.remove(faceid)
+                        if vert_ids_in_face[k] != ind:
+                            surface.vertices[vert_ids_in_face[k]].faces.remove(faceid)
                         ids_in_face[k]=ind_in_face
                     f=f+1
-                    #print(ids_in_face)
                     self.faces.append(Face(vertex_ids=ids_in_face))
-                    #print("f=",f)
+
 
 class Surface:
     def __init__(self):
@@ -61,12 +56,11 @@ class Surface:
 
     def getSurf(self,subject=None, hemi=None, surf=None,**kwargs):
         coords, faces = ioFunctions.loadSurf(subject,hemi,surf)
-        self.vertices=[Vertex() for acoord in coords]
+        self.vertices=[Vertex(acoord) for acoord in coords]
         f=0 #there is probably a better way to do this
         for aface in faces:
             self.faces.append(Face(vertex_ids=aface))
             for node in range(3):
-                self.vertices[aface[node]].coords=coords[aface[node]] #many faces point to same vertex so fix this
                 self.vertices[aface[node]].faces.append(f)
             f=f+1
         del coords
