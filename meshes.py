@@ -25,6 +25,7 @@ class Gyrus:
     def getGyrus(self, surface, gyrusIndex): #filter out a gyrus based on
         if surface.aparc is None:
             raise ValueError("Aparc not loaded")
+        print("fetching submesh as a new mesh")
         inds = np.where(surface.aparc.labels == gyrusIndex)
         inds = inds[0][:]
         self.vertices = [Vertex() for ind in inds]

@@ -13,7 +13,7 @@ pial.getSurf(subject="101006", hemi="lh", surf="pial")
 pial.getAparc(subject="101006", hemi="lh")
 
 someGyrus = meshes.Gyrus()
-someGyrus.getGyrus(pial, 25)
+someGyrus.getGyrus(pial, 24)
 
 
 
@@ -26,11 +26,8 @@ for vertex in someGyrus.vertices:
     z.append(vertex.coords[2])
 
 
-triangles=np.row_stack([face.vertex_ids for face in someGyrus.faces])
-
-
-mlab.triangular_mesh(x,y,z,triangles)
-mlab.show()
+triangles = np.row_stack([face.vertex_ids for face in someGyrus.faces])
+vertices = np.row_stack([vertex.coords for vertex in someGyrus.vertices])
 
 
 # fig = plt.figure()
@@ -41,6 +38,12 @@ mlab.show()
 #nibabel.freesurfer.io.write_geometry('test',someGyrus.coords,someGyrus.faces)
 
 
-#igl.pyigl.principal_curvature(pial.coords[1:50], pial.faces[1:50],2)
+[PD1, PD2, PV1, PV2]=igl.principal_curvature(vertices,triangles,radius=5)
 
+
+
+mlab.quiver3d(x,y,z,PD1[:,0],PD1[:,1],PD1[:,2],scalars=PV1)
+mlab.quiver3d(x,y,z,PD2[:,0],PD2[:,1],PD2[:,2],scalars=PV2)
+mlab.triangular_mesh(x,y,z,triangles,scalars=PV1+PV2)
+mlab.show()
 
