@@ -1,0 +1,9 @@
+1) Make a class for foliations:
+    * This will have N full meshes in it
+    * Have to specify the path and file names appropriately
+        o Go back and make sure the script for equivolume surfaces outputs integers
+
+2) Make a plotting class:
+    * The requirements for plotting will change as the code progresses
+    * Need something that can plot scalars and vectors on meshses
+    * Need something that will make plots of scalars versus deep/superficial coordinate

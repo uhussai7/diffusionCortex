@@ -19,7 +19,7 @@ def loadSurf(subject=None, hemi=None, surf=None,**kwargs):
     surface_path = subject_path / "surf" / filename
     print("loading: " + str(surface_path.resolve()))
 
-    return(nibabel.freesurfer.io.read_geometry(surface_path))
+    return nibabel.freesurfer.io.read_geometry(surface_path, read_metadata=True)
 
 
 def loadAparc(subject=None, hemi=None,**kwargs):
@@ -37,4 +37,23 @@ def loadAparc(subject=None, hemi=None,**kwargs):
     annot_path = subject_path / "label" / filename
     print("loading: " + str(annot_path.resolve()))
 
-    return(nibabel.freesurfer.io.read_annot(annot_path))
+    return nibabel.freesurfer.io.read_annot(annot_path)
+
+def loadVol(filename=None, **kwargs):
+    #subject is the subject id
+    # dyad is integer for which dyad
+    if filename is None:
+        raise ValueError("Please provide filename, filename=...")
+    print("loading: " + filename)
+    return nibabel.load(filename)
+
+def loadMgz(subject=None, **kwards):
+    #This will load T1 mgz file
+    if subject is None:
+        raise ValueError("Please provide subject, subject=...")
+
+    subject_path = dataWhere.freesurfer_path / subject
+    filename = "T1.mgz"
+    mgz_path = subject_path / "mri" / filename
+    print("loading: " + str(mgz_path.resolve()))
+    return nibabel.load(str(mgz_path.resolve()))
