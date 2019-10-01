@@ -1,6 +1,8 @@
 import ioFunctions
 import numpy as np
 from scipy import interpolate
+from mayavi import mlab
+
 
 class Face:
     def __init__(self,vertex_ids=None):
@@ -132,3 +134,73 @@ class Projection: #this is to project volume data onto mesh
                     #print(j)
                     temp1[j]=float(interpolator[j](temp))
                 self.vector.append(np.asarray(temp1))
+
+
+class Foliation: #this will load a whole brain foliation
+    def __init__(self,N=None):
+        if N is None:
+            raise ValueError("please call with number of surfaces")
+        self.N_s=N
+        self.surfaces=[Surface() for surf in range(self.N_s)]
+
+    def getFoliation(self,subject=None, hemi=None):
+        N=1
+        for surf in self.surfaces:
+            surface="equi"+str(N)+".pial"
+            surf.getSurf(subject=subject,hemi=hemi,surf=surface)
+            N = N + 1
+
+class foliationProjection():
+    def __init__(self,foliation=None,vol=None, header=None):
+        self.projection=[Projection() for i in range(foliation.N_s)]
+        for i in range(foliation.N_s):
+            print("projecting on surface"+ str(i))
+            self.projection[i].project(vol=vol,mesh=foliation.surfaces[i],header=header)
+
+
+
+
+
+
+class Vision:
+    def __init__(self):
+        mesh=[]
+        scalar=[]
+        vector=[]
+        x=[]
+        y=[]
+        z=[]
+        triangles=[]
+        vector_added=[]
+
+    def processMesh(self, mesh=None):
+        self.mesh=mesh
+        x=[]
+        y=[]
+        z=[]
+        triangles=[]
+        for vertex in self.mesh.vertices:
+            x.append(vertex.coords[0])
+            y.append(vertex.coords[1])
+            z.append(vertex.coords[2])
+        triangles = np.row_stack([face.vertex_ids for face in self.mesh.faces])
+        self.x=x
+        self.y=y
+        self.z=z
+        self.triangles=triangles
+        mlab.triangular_mesh(self.x,self.y,self.z,self.triangles)
+        #mlab.triangular_mesh(x, y, z, triangles)
+
+    def addVector(self, vector=None): #for now this will take vector fields from Projection class
+        tempVector=np.row_stack([thisVector for thisVector in vector])
+        self.vector=tempVector
+        self.vector_added=1
+
+
+    def show(self):
+        mlab.triangular_mesh(self.x,self.y,self.z,self.triangles)
+        if self.vector_added==1:
+            mlab.quiver3d(self.x, self.y, self.z, self.vector[:, 0], self.vector[:, 1], self.vector[:, 2])
+        mlab.show()
+
+

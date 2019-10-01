@@ -40,8 +40,6 @@ def loadAparc(subject=None, hemi=None,**kwargs):
     return nibabel.freesurfer.io.read_annot(annot_path)
 
 def loadVol(filename=None, **kwargs):
-    #subject is the subject id
-    # dyad is integer for which dyad
     if filename is None:
         raise ValueError("Please provide filename, filename=...")
     print("loading: " + filename)

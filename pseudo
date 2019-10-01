@@ -1,9 +1,15 @@
 1) Make a class for foliations:
-    * This will have N full meshes in it
-    * Have to specify the path and file names appropriately
-        o Go back and make sure the script for equivolume surfaces outputs integers
+    *[D] This will have N full meshes in it
+    *[D] Have to specify the path and file names appropriately
+        o[D] Go back and make sure the script for equivolume surfaces outputs integers
+            * Had to modify their code for this
+    * Projecting on each surface of foliation takes a long time because the Projection class makes an interpolator for
+      each surface in the foliation
+        o The fix is to make a volume class that has a function makeInterpolator and integer InterpolatorDone that can
+          then be used by projection class and other function
 
 2) Make a plotting class:
     * The requirements for plotting will change as the code progresses
     * Need something that can plot scalars and vectors on meshses
     * Need something that will make plots of scalars versus deep/superficial coordinate
+
