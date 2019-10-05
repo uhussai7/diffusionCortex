@@ -1,6 +1,7 @@
 import meshes
 import ioFunctions
-# import numpy as np
+import igl
+import numpy as np
 # import igl.pyigl
 # import nibabel
 # import matplotlib.pyplot as plt
@@ -9,29 +10,41 @@ import ioFunctions
 # import vtk
 # import ioFunctions as io
 
+
 pial=meshes.Surface()
 
 pial.getSurf(subject="101006", hemi="lh", surf="pial")
 pial.getAparc(subject="101006", hemi="lh")
 
 
+
 someGyrus = meshes.Submesh()
 someGyrus.getSubmesh(pial, 24)
 
-dyad1=ioFunctions.loadVol("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion.bedpostX\\dyads1.nii.gz")
+dyad1=meshes.Volume()
+dyad1.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion.bedpostX\\dyads1.nii.gz")
+# #dyad1.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion.bedpostX\\dyads1.nii.gz")
+dyad1.makeInterpolator()
 mgz=ioFunctions.loadMgz(subject="101006")
-dyad1_proj=meshes.Projection()
-dyad1_proj.project(mesh=someGyrus,vol=dyad1, header=mgz.header)
+# dyad1_proj=meshes.Projection()
+# dyad1_proj.project(mesh=someGyrus,volume=dyad1, header=mgz.header)
+
+
+# somePlot=meshes.Vision()
+# somePlot.processMesh(mesh=someGyrus)
+# somePlot.addVector(dyad1_proj.vector)
+# somePlot.show()
+# #
+#reload(meshes)
+fol=meshes.Foliation(10)
+fol.getFoliation(subject="101006", hemi="lh")
+folProj=meshes.FoliationProjection(fol,dyad1,mgz.header)
 
 
 somePlot=meshes.Vision()
-somePlot.processMesh(mesh=someGyrus)
-somePlot.addVector(dyad1_proj.vector)
+somePlot.processMesh(mesh=fol.surfaces[5])
+somePlot.addVector(folProj.projection[5].vector)
 somePlot.show()
-
-fol=meshes.Foliation(10)
-fol.getFoliation(subject="101006", hemi="lh")
-folProj=meshes.foliationProjection(fol,dyad1,mgz.header)
 
 # x=[]
 # y=[]
@@ -72,6 +85,18 @@ folProj=meshes.foliationProjection(fol,dyad1,mgz.header)
 #
 #
 # mlab.show()
+
+normalVectors= np.row_stack([thisVector for thisVector in vector])
+
+vertices=np.row_stack([vertex.coords for vertex in pial.vertices ])
+faces=np.row_stack([face.vertex_ids for face in pial.faces ])
+normalVectors=igl.per_vertex_normals(vertices,faces, weighting=1)
+
+somePlot=meshes.Vision()
+somePlot.processMesh(mesh=pial)
+somePlot.addVector(normalVectors)
+somePlot.show()
+
 
 
 
