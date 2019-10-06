@@ -95,11 +95,16 @@ class Surface:
         """
         Class to store surface meshes
         """
+        self.subject=[]
+        self.hemi=[]
         self.vertices= []
         self.faces = []
         self.aparc = Annot() #this will be for lh/rh.aparc.annot
         self.volume_info = []
         self.normals=Normals()
+        self.gaussian_curvature=[]
+        self.freesurfer_curvature=[]
+
 
     def getSurf(self,subject=None, hemi=None, surf=None,**kwargs):
         """
@@ -110,6 +115,8 @@ class Surface:
         :param kwargs:
         :return: Will store new mesh in self.vertices and self.faces of same class
         """
+        self.subject=subject
+        self.hemi=hemi
         coords, faces, self.volume_info  = ioFunctions.loadSurf(subject,hemi,surf)
         self.vertices=[Vertex(acoord) for acoord in coords]
         f=0 #there is probably a better way to do this
@@ -131,6 +138,14 @@ class Surface:
         :return: Will store in self.aparc which is Annot() class
         """
         self.aparc.labels, self.aparc.ctab, self.aparc.names = ioFunctions.loadAparc(subject,hemi)
+
+    def getGaussCurv(self):
+        vertices = np.row_stack([vertex.coords for vertex in self.vertices])
+        faces = np.row_stack([face.vertex_ids for face in self.faces])
+        self.gaussian_curvature=igl.principal_curvature(vertices, faces)
+
+    def getFreesurferCurv(self):
+        self.freesurfer_curvature=ioFunctions.loadMorph(subject=self.subject,hemi=self.hemi)
 
 
 class Projection: #this is to project volume data onto mesh
@@ -222,6 +237,8 @@ class Foliation: #this will load a whole brain foliation
             surf.getSurf(subject=subject,hemi=hemi,surf=surface)
             N = N + 1
             surf.normals.getNormals(surf)
+            surf.getGaussCurv()
+            surf.getFreesurferCurv()
 
 
 class FoliationProjection():

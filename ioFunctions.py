@@ -39,6 +39,23 @@ def loadAparc(subject=None, hemi=None,**kwargs):
 
     return nibabel.freesurfer.io.read_annot(annot_path)
 
+def loadMorph(subject=None, hemi=None,**kwargs):
+    # subject is subject id
+    # type is pial, white matter, etc
+    # hemi is left or right hemisphere
+    # arguments will be keywords that freesurfer uses
+    if subject is None:
+        raise ValueError("Please provide subject, subject=...")
+    if hemi is None:
+        raise ValueError("Please provide hemisphere (lh or rh), hemi=...")
+
+    subject_path = dataWhere.freesurfer_path / subject
+    filename=hemi+".curv"
+    curv_path = subject_path / "surf" / filename
+    print("loading: " + str(curv_path.resolve()))
+
+    return nibabel.freesurfer.io.read_morph_data(curv_path)
+
 def loadVol(filename=None, **kwargs):
     if filename is None:
         raise ValueError("Please provide filename, filename=...")
