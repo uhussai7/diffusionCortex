@@ -26,9 +26,15 @@ class Normals:
     def __init__(self):
         self.vectors = []
 
-    def getNormals(self, vertices=None, faces=None):
-
-        self.vectors=igl.per_vertex_normals()
+    def getNormals(self, mesh=None):
+        """
+        Computes the normals for a mesh
+        :param mesh: This should be some class that has mesh.vertices and mesh.faces of Vertex and Face class respectively
+        :return: Puts vectors in self.vectors
+        """
+        vertices = np.row_stack([vertex.coords for vertex in mesh.vertices])
+        faces = np.row_stack([face.vertex_ids for face in mesh.faces])
+        self.vectors=igl.per_vertex_normals(vertices,faces,weighting=1)
 
 
 
@@ -48,6 +54,7 @@ class Submesh:
         """
         self.vertices = []
         self.faces = []
+        self.normals= Normals()
 
     def getSubmesh(self, surface, index): #filter out a submesh based on a label for vertices
         """
@@ -80,6 +87,7 @@ class Submesh:
                         ids_in_face[k]=ind_in_face
                     f=f+1
                     self.faces.append(Face(vertex_ids=ids_in_face))
+        self.normals.getNormals(self)
 
 
 class Surface:
@@ -91,6 +99,7 @@ class Surface:
         self.faces = []
         self.aparc = Annot() #this will be for lh/rh.aparc.annot
         self.volume_info = []
+        self.normals=Normals()
 
     def getSurf(self,subject=None, hemi=None, surf=None,**kwargs):
         """
@@ -111,6 +120,7 @@ class Surface:
             f=f+1
         del coords
         del faces
+        self.normals.getNormals(self)
 
     def getAparc(self, subject=None, hemi=None, **kwargs):
         """
@@ -174,12 +184,18 @@ class Projection: #this is to project volume data onto mesh
             self.points.append(point[0,0:3])
 
         #TODO have to put something for other stuff too like scalars, etc.
-        #if shape[3]==1:
+        if shape[3]==1:
+            temp=[]
+            temp.append(volume.interpolator(self.points))
+            self.scalar=temp[0][:]
+
         if shape[3]==3:
             temp=[]
             for j in range(shape[3]):
                 temp.append(volume.interpolator[j](self.points))
             self.vector = np.column_stack((temp[0],temp[1],temp[2]))
+
+
 
 
 class Foliation: #this will load a whole brain foliation
@@ -205,6 +221,8 @@ class Foliation: #this will load a whole brain foliation
             surface="equi"+str(N)+".pial"
             surf.getSurf(subject=subject,hemi=hemi,surf=surface)
             N = N + 1
+            surf.normals.getNormals(surf)
+
 
 class FoliationProjection():
     def __init__(self,foliation=None,volume=None, header=None):
@@ -252,21 +270,27 @@ class Volume():
             k = np.linspace(0, shape[2] - 1, num=shape[2])
             self.interpolator = [interpolate.RegularGridInterpolator((i, j, k), img[:, :, :, f]) for f in range(shape[3])]
             self.interpExists=1
-
-
+        if shape[3] == 1:
+            i = np.linspace(0, shape[0] - 1, num=shape[0])
+            j = np.linspace(0, shape[1] - 1, num=shape[1])
+            k = np.linspace(0, shape[2] - 1, num=shape[2])
+            self.interpolator = interpolate.RegularGridInterpolator((i, j, k), img[:, :, :, 0])
+            self.interpExists = 1
 
 
 
 class Vision:
     def __init__(self):
-        mesh=[]
-        scalar=[]
-        vector=[]
-        x=[]
-        y=[]
-        z=[]
-        triangles=[]
-        vector_added=[]
+        self.mesh=[]
+        self.scalar=[]
+        self.vector=[]
+        self.x=[]
+        self.y=[]
+        self.z=[]
+        self.triangles=[]
+        self.vector_added=0
+        self.scalar_added=0
+
 
     def processMesh(self, mesh=None):
         self.mesh=mesh
@@ -291,9 +315,15 @@ class Vision:
         self.vector=tempVector
         self.vector_added=1
 
+    def addScalar(self, scalar=None):
+        self.scalar=scalar
+        self.scalar_added=1
 
     def show(self):
-        mlab.triangular_mesh(self.x,self.y,self.z,self.triangles)
+        if self.scalar_added==1:
+            mlab.triangular_mesh(self.x,self.y,self.z,self.triangles, scalars=self.scalar)
+        else:
+            mlab.triangular_mesh(self.x, self.y, self.z, self.triangles)
         if self.vector_added==1:
             mlab.quiver3d(self.x, self.y, self.z, self.vector[:, 0], self.vector[:, 1], self.vector[:, 2])
         mlab.show()
