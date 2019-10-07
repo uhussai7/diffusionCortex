@@ -142,7 +142,7 @@ class Surface:
     def getGaussCurv(self):
         vertices = np.row_stack([vertex.coords for vertex in self.vertices])
         faces = np.row_stack([face.vertex_ids for face in self.faces])
-        self.gaussian_curvature=igl.principal_curvature(vertices, faces)
+        self.gaussian_curvature=igl.principal_curvature(vertices, faces,radius=6)
 
     def getFreesurferCurv(self):
         self.freesurfer_curvature=ioFunctions.loadMorph(subject=self.subject,hemi=self.hemi)
