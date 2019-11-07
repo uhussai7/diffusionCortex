@@ -4,4 +4,9 @@ import numpy as np
 dvol=diffusion.diffVolume()
 dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
 
-inds=np.where(np.logical_and(dvol.gtab.bvals >= 800, dvol.gtab.bvals <=1200 ))
+dvol.shells()
+
+
+for j in range(2):
+    for i in range(3):
+        test.append(D[i][j])
