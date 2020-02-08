@@ -25,6 +25,7 @@ class so3():
         self.signal2=[]
         self.axa_top=[]
         self.max_indices=[]
+        self.top_average=[]
 
     def makeSo3(self,N,shellN):
         """
@@ -64,32 +65,40 @@ class so3():
 
     def top_axa(self):
         """
-        Axis-angle representation of points with max overlap
+        Axis-angle representation of points with max overlap (all shells, real part)
         :return: axis-angles
         """
-        temp=self.so3[:,:,:,0,0]
-        max_indices=np.asarray(np.where(temp==1))
-        self.max_indices=max_indices
-        shape=max_indices.shape
+        for shell in range(0,self.shellN):
+            temp=self.so3[:,:,:,0,shell]
+            max_indices=np.asarray(np.where(temp==1))
 
-        x=np.empty(shape[1])
-        y=np.empty(shape[1])
-        z=np.empty(shape[1])
-        psi=np.empty(shape[1])
-        for i in range(0,shape[1]):
-            max_index=max_indices[:,i]
-            beta=max_index[0]*(np.pi/(self.N-1))
-            alpha=max_index[1]*(2*np.pi/(self.N-1))
-            gamma=max_index[2]*(2*np.pi/(self.N-1))
-            axis_angle=somemath.euler_to_axis_angle_zyz(alpha,beta,gamma)
-            x[i]=axis_angle[0][0]
-            y[i]=axis_angle[0][1]
-            z[i]=axis_angle[0][2]
-            psi[i]=axis_angle[1]
-        r, theta, phi = cart2sphere(x, y, z)
-        self.axa_top=np.row_stack((theta,phi,psi))
-        self.axa_top=np.asarray(self.axa_top)
+            shape=max_indices.shape
 
+            x=np.empty(shape[1])
+            y=np.empty(shape[1])
+            z=np.empty(shape[1])
+            psi=np.empty(shape[1])
+            for i in range(0,shape[1]):
+                max_index=max_indices[:,i]
+                beta=max_index[0]*(np.pi/(self.N-1))
+                alpha=max_index[1]*(2*np.pi/(self.N-1))
+                gamma=max_index[2]*(2*np.pi/(self.N-1))
+                axis_angle=somemath.euler_to_axis_angle_zyz(alpha,beta,gamma)
+                x[i]=axis_angle[0][0]
+                y[i]=axis_angle[0][1]
+                z[i]=axis_angle[0][2]
+                psi[i]=axis_angle[1]
+            r, theta, phi = cart2sphere(x, y, z)
+            axa_top=np.row_stack((theta,phi,psi))
+            self.max_indices.append(max_indices)
+            self.axa_top.append(axa_top)
+
+        #self.axa_top = np.asarray(self.axa_top)
+        avg=self.axa_top[1:,2,0]
+        avg=np.asarray(avg)
+        avg=avg.sum()
+        avg=avg/(self.shellN-1)
+        self.top_average=avg
 
     def makeSo3_axa(self):
         """

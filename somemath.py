@@ -390,7 +390,18 @@ def EulerZYZ2AxisAngle(alpha, beta, gamma):
 
     return theta,phi,psi
 
-
+def parity_symmetrize(grid):
+    grid=np.asarray(grid)
+    shp=grid.shape
+    N=shp[0]
+    for i in range(0,int(N/2)):
+        for j in range(0,N):
+            it=N-1-i
+            jt=(j+int(N/2))%N
+            temp=0.5*(grid[i,j]+grid[it,jt])
+            grid[i,j]=temp
+            grid[it,jt]=temp
+    return grid
 class sphereSig():
     def __init__(self):
         self.grid=[]
@@ -460,3 +471,5 @@ class sphereSig():
     #     self.grid = 0
     #     mid = int(N / 2)
     #     self.grid[mid - 2:mid + 2,] = 1
+
+

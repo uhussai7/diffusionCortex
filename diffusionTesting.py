@@ -12,23 +12,47 @@ import scipy.special as special
 from matplotlib import cm, colors
 from mpl_toolkits.mplot3d import Axes3D
 import somemath
+import anti_lib
+import anti_lib_progs
+import geodesic
 
-dvol=diffusion.diffVolume()
-#dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
-dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
-dvol.shells()
-so3=dvol.conv([73,89,74],[88,89,90],32,4)
-so3.makeNii('test',3)
-real_list=so3.so3[:,:,:,0,3]
+# dvol=diffusion.diffVolume()
+# #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
+# dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
+# dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Phantom") #phantom
+# dvol.shells()
+# #so3=dvol.conv([47,33,3],[47,33,4],32,4,tN=5) #orhtogonal white matter
+# # #so3=dvol.conv([103,73,97],[100,73,96],32,4) #cortex superficial deep
+# so3.makeNii('test',3)
+# real_list=so3.so3[:,:,:,0,3]
+#
+# p1=[73,89,74]
+# p2=[88,89,90]
+# for shell in range(0, 4):
+#     s1 = []
+#     s2 = []
+#     th = []
+#     ph = []
+#     i = 0
+#     for ind in dvol.inds[shell]:
+#         s1.append(dvol.img[p1[0], p1[1], p1[2], ind])
+#         s2.append(dvol.img[p2[0], p2[1], p2[2], ind])
+#         th.append(dvol.bvecs_hemi_sphere[shell][i][1])
+#         ph.append(dvol.bvecs_hemi_sphere[shell][i][2])
+#         i = i + 1
+#     th = np.asarray(th)
+#     ph = np.asarray(ph)
+#     s1 = np.asarray(s1)
+#     s2 = np.asarray(s2)
 
 #plot the spherical signals using somemath.sphereSig() class
-sig=[somemath.sphereSig(),somemath.sphereSig()]
-sig[0].grid=so3.signal1[:,:,3]
-sig[1].grid=so3.signal2[:,:,3]
-sig[0].N=32
-sig[1].N=32
-sig[0].plot()
-sig[1].plot()
+# sig=[somemath.sphereSig(),somemath.sphereSig()]
+# sig[0].grid=so3.signal1[:,:,3]
+# sig[1].grid=so3.signal2[:,:,3]
+# sig[0].N=32
+# sig[1].N=32
+# sig[0].plot()
+# sig[1].plot()
 
 # #convolution testing
 # # conv=s2conv.conv()

@@ -4,8 +4,13 @@ from scipy import interpolate
 import dipy
 import s2cnn
 from scipy.interpolate import griddata
+from scipy.interpolate import SmoothSphereBivariateSpline
+from scipy.interpolate import LSQSphereBivariateSpline
+
 import torch
 import s2conv
+import somemath
+
 
 class diff2d():
     def __init__(self):
@@ -35,6 +40,10 @@ class diffVolume():
         self.inds= []
         self.gtab = []
         self.img=[]
+        self.sgrad_x=[]
+        self.sgrad_y = []
+        self.sgrad_z = []
+
 
     def getVolume(self, folder=None):
         """
@@ -122,7 +131,7 @@ class diffVolume():
         self.bvecs_hemi_cart=np.asarray(self.bvecs_hemi_cart)
         self.bvecs_hemi_sphere=np.asarray(self.bvecs_hemi_sphere)
 
-    def conv(self,p1,p2,N,shellN):
+    def conv(self,p1,p2,N,shellN,tN=None):
         """
         :param p1: voxel 1 coordinates
         :param p2: voxel 2 coordinates
@@ -133,7 +142,18 @@ class diffVolume():
         #put functions on grid
         so3=s2conv.so3()
         so3.makeSo3(N,shellN)
+
+        so3.signal1 = [somemath.sphereSig() for i in range(0, shellN)]
+        so3.signal2 = [somemath.sphereSig() for i in range(0, shellN)]
         #so3=np.empty([N,N,N,2,shellN])
+        theta = np.linspace(0, np.pi, N)
+        phi = np.linspace(0, 2 * np.pi, N)
+        ep=0.0001
+        if tN==None:
+            tN=10
+        tt = np.linspace(ep, np.pi-ep, tN)
+        tp = np.linspace(ep, 2 * np.pi-ep, tN)
+
         for shell in range(0,shellN):
             s1 = []
             s2 = []
@@ -151,11 +171,19 @@ class diffVolume():
             s1 = np.asarray(s1)
             s2 = np.asarray(s2)
             b=int(N/2)
-            pi=3.14159265359
-            theta=np.linspace(0,pi,N)
-            phi=np.linspace(0,2*pi,N)
-            ss1 = griddata((th, ph), 100000/s1, (theta[None,:], phi[:,None]), method='nearest')
-            ss2= griddata((th, ph), 100000/s2, (theta[None,:], phi[:,None]), method='nearest')
+            ss1 = griddata((th, ph), 1/s1, (theta[None,:], phi[:,None]), method='nearest')#, fill_value=-1)
+            ss2= griddata((th, ph), 1/s2, (theta[None,:], phi[:,None]), method='nearest')#,fill_value=-1)
+            #lut_s1 = SmoothSphereBivariateSpline(th,ph,s1/s1.max(),s=0.6,eps=1e-8)
+            #lut_s2 = SmoothSphereBivariateSpline(th, ph, s2/s2.max(),s=0.6,eps=1e-8)
+            #lut_s1 = LSQSphereBivariateSpline(th, ph, s1 / s1.max(), tt,tp)#, eps=1e-8)
+            #lut_s2 = LSQSphereBivariateSpline(th, ph, s2 / s2.max(), tt,tp)#, eps=1e-8)
+            #ss1 = lut_s1(theta,phi)
+            #ss2 = lut_s2(theta, phi)
+            ss1=ss1/ss1.max()
+            ss2 = ss2 / ss1.max()
+            #ss1=somemath.parity_symmetrize(ss1)
+            #ss2 = somemath.parity_symmetrize(ss2)
+
 
             sss1 = np.empty([N, N, 2])
             sss1[:, :, 0] = np.real(ss1)
@@ -165,9 +193,11 @@ class diffVolume():
             sss2[:, :, 0] = np.real(ss2)
             sss2[:, :, 1] = np.imag(ss2)
 
-            so3.signal1[:,:,shell] = np.real(ss1)
-            so3.signal2[:,:,shell] = np.real(ss2)
 
+            so3.signal1[shell].grid = np.real(ss1)
+            so3.signal2[shell].grid = np.real(ss2)
+            so3.signal1[shell].N = N
+            so3.signal2[shell].N = N
 
             g1 = torch.tensor(sss1, dtype=torch.float)
             g1ft = s2cnn.soft.s2_fft.s2_fft(g1, b_out=b)
@@ -195,5 +225,9 @@ class diffVolume():
             xxiftn = xxift.numpy()
             xxiftnsmall = np.empty([N, N, N,2])
             xxiftnsmall = xxiftn[0, 0, :, :, :, :]
+            xxiftnsmall = xxiftnsmall / xxiftnsmall.max()
             so3.so3[:,:,:,:,shell]=xxiftnsmall #[beta, alpha, gamma, complex] beta=[0, pi], alpha=[0,2pi]  gamma=[0,2pi]
         return so3
+
+        # def so3_grad(self):
+        #     size=

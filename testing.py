@@ -1,48 +1,69 @@
-import s2conv
-import numpy as np
-
-conv=s2conv.conv()
-#conv.s1.gauss(0,3*np.pi/2,0.25,64)
-s1_grid=np.empty([64,64])
-s1_grid[:,:]=0
-s1_grid[27:36,0:4]=1
-s1_grid[27:36,58:63]=1
-conv.s1.grid=s1_grid
-conv.s1.N=64
-
-s2_grid=np.empty([64,64])
-s2_grid[:,:]=0
-s2_grid[0:10,:]=1
-conv.s2.grid=s2_grid
-conv.s2.N=64
-
-
-#conv.s2.gauss(np.pi/2,3*np.pi/2,0.25,64)
-conv.conv()
-conv.so3.makeNii('gauss',0)
-conv.s1.plot()
-conv.s2.plot()
-
-
-# import meshes
-# import ioFunctions
-# import igl
+# import s2conv
 # import numpy as np
-# import matplotlib.pyplot as plt
-# from matplotlib import animation
 #
-# # import igl.pyigl
-# # import nibabel
-# # import matplotlib.pyplot as plt
-# # from mpl_toolkits.mplot3d import Axes3D
-# # from mayavi import mlab
-# # import vtk
-# # import ioFunctions as io
+# conv=s2conv.conv()
+# #conv.s1.gauss(0,3*np.pi/2,0.25,64)
+# s1_grid=np.empty([64,64])
+# s1_grid[:,:]=0
+# s1_grid[27:36,0:4]=1
+# s1_grid[27:36,58:63]=1
+# conv.s1.grid=s1_grid
+# conv.s1.N=64
 #
-# #subject="100610"
-# #fol=meshes.Foliation(10)
-# #fol.getFoliation(subject=subject, hemi="lh")
+# s2_grid=np.empty([64,64])
+# s2_grid[:,:]=0
+# s2_grid[0:10,:]=1
+# conv.s2.grid=s2_grid
+# conv.s2.N=64
 #
+#
+# #conv.s2.gauss(np.pi/2,3*np.pi/2,0.25,64)
+# conv.conv()
+# conv.so3.makeNii('gauss',0)
+# conv.s1.plot()
+# conv.s2.plot()
+#
+
+import meshes
+import ioFunctions
+import igl
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import animation
+
+import igl.pyigl
+import nibabel
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mayavi import mlab
+import vtk
+import ioFunctions as io
+
+subject="100610"
+# fol=meshes.Foliation(10)
+# fol.getFoliation(subject=subject, hemi="lh")
+
+pial=meshes.Surface()
+pial.getSurf(subject=subject, hemi="lh", surf="pial")
+pial.getAparc(subject=subject, hemi="lh")
+someGyrus = meshes.Submesh()
+someGyrus.getSubmesh(pial, 24)
+
+
+someG=meshes.Surface()
+someG.faces=someGyrus.faces
+someG.vertices=someGyrus.vertices
+someG.getGaussCurv()
+
+vis=meshes.Vision()
+vis.processMesh(mesh=someG)
+vis.show()
+someG.getGaussCurv()
+vis.addVector(someG.gaussian_curvature[0])
+vis.addVector(someG.gaussian_curvature[1])
+mean=0.5*(someG.gaussian_curvature[2]+someG.gaussian_curvature[3])
+vis.addScalar(mean)
+vis.addVector()
 #
 #
 #
@@ -102,14 +123,14 @@ conv.s2.plot()
 # #      #plt.ylim([-1.5, 1.5])
 # #      plt.show()
 #
-# # pial=meshes.Surface()
-# # pial.getSurf(subject=subject, hemi="lh", surf="pial")
-# # pial.getAparc(subject=subject, hemi="lh")
-# #
-# #
-# #
-# # someGyrus = meshes.Submesh()
-# # someGyrus.getSubmesh(pial, 24)
+# pial=meshes.Surface()
+# pial.getSurf(subject=subject, hemi="lh", surf="pial")
+# pial.getAparc(subject=subject, hemi="lh")
+#
+#
+#
+# someGyrus = meshes.Submesh()
+# someGyrus.getSubmesh(pial, 24)
 # # # #
 # # # # dyad1=meshes.Volume()
 # # # # #dyad1.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion.bedpostX\\dyads1.nii.gz")
