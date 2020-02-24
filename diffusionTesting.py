@@ -16,11 +16,12 @@ import anti_lib
 import anti_lib_progs
 import geodesic
 
-# dvol=diffusion.diffVolume()
-# #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
-# dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
-# dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Phantom") #phantom
-# dvol.shells()
+dvol=diffusion.diffVolume()
+#dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
+#dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
+#dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Phantom") #phantom
+dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
+dvol.shells()
 # #so3=dvol.conv([47,33,3],[47,33,4],32,4,tN=5) #orhtogonal white matter
 # # #so3=dvol.conv([103,73,97],[100,73,96],32,4) #cortex superficial deep
 # so3.makeNii('test',3)
