@@ -5,6 +5,10 @@ import math
 from anti_lib import Vec
 import matplotlib.cm as cm
 from scipy.spatial.transform import Rotation as R
+import matplotlib.pyplot as plt
+import diffusion
+
+
 
 class isomesh:
     def __init__(self):
@@ -19,6 +23,7 @@ class isomesh:
         self.m= 4 #parameter for geodesic mesh
         self.testStrip=np.empty([self.m+1,self.m+1]) #note that this is a half strip
         self.sphereFunction=np.empty([5,2,100])
+        self.s_flat=[]
 
     def get_icomesh(self):
         geodesic.get_icosahedron(self.vertices, self.faces)
@@ -109,7 +114,7 @@ class isomesh:
         m = self.m
         N = m + 1
         if (j > i):
-            out=N * i + j + 1 - (i + 1) * (i + 2) / 2 # this is the formula for the upper triangle
+            out=N * i + j - (i + 1) * (i + 2) / 2 # this is the formula for the upper triangle
 
         else:
             pos = N * i + j
@@ -119,35 +124,45 @@ class isomesh:
 
         return out
 
-    def testFunction(self): #fills up vertices of mesh with colors
-        for c in range(0, 5):
-            for i in range(0, 4):
-                d = 0
-                for point in iso.Points[c][i]:
-                    x = []
-                    y = []
-                    z = []
-                    x.append(point[0])
-                    y.append(point[1])
-                    z.append(point[2])
-                    col = cm.BuPu(d / 55)
-                    mlab.points3d(x, y, z, scale_factor=0.08, color=col[0:3])  # (1/(d*2),1/d,1/(1+d)))
-                    d = d + 1
+    def makeFlat(self,): #fills up vertices of mesh with colors
+        m= self.m
+        N= m+1
+        height = N+1
+        width = 5*(N+1)
+        self.s_flat=np.empty([height,width])
+        self.s_flat[:]=0
+        for c in range(0,5):
+            for i in range(0,N):
+                for j in range(0,N):
+                    I=i
+                    J=(N+1)*c + j + 1
+                    self.s_flat[I,J]=self.cij2thetaphi(c,i,j)
 
+    def cij2thetaphi(self,c,i,j):
+        v=self.mat2mesh(i,j)
+        if (j>i):
+            t=0
+        else:
+            t=1
+        #self.Points[c][t][v]
+        return v#((0*c+t/10+v/100)*100)
 
-    # def makeSquares(self):
+   # def makeSquares(self):
     #     m = self.m
     #     N = m + 1
     #     np.empty([])
 
 iso=isomesh()
 iso.get_icomesh()
+iso.makeFlat()
+plt.imshow(iso.s_flat)
+plt.colorbar()
 iso.plot_icomesh()
 c=0
 for c in range(0,1):
     for i in range(1,2):
         d=0
-        for point in iso.Points[c][i]:
+        for point in iso.Points[c][i][0:1]:
             x = []
             y = []
             z = []
@@ -158,6 +173,13 @@ for c in range(0,1):
             mlab.points3d(x, y, z, scale_factor=0.08,color=col[0:3])#(1/(d*2),1/d,1/(1+d)))
             d=d+1
 
+mlab.show()
+dvol=diffusion.diffVolume()
+dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
+dvol.shells()
+
+
+
 # for point in dvol.bvecs[1]:
 #     x = []
 #     y = []
@@ -167,6 +189,6 @@ for c in range(0,1):
 #     y.append(point[1])
 #     z.append(point[2])
 #     mlab.points3d(x, y, z, scale_factor=0.08, color=col[0:3])  # (1/(d*2),1/d,1/(1+d)))
-mlab.show()
+# mlab.show()
 
 

@@ -4,13 +4,14 @@ from scipy import interpolate
 import dipy
 import s2cnn
 from scipy.interpolate import griddata
+from scipy.interpolate import NearestNDInterpolator
+from scipy.interpolate import LinearNDInterpolator
 from scipy.interpolate import SmoothSphereBivariateSpline
 from scipy.interpolate import LSQSphereBivariateSpline
-
 import torch
 import s2conv
 import somemath
-
+import matplotlib.pyplot as plt
 
 class diff2d():
     def __init__(self):
@@ -43,6 +44,7 @@ class diffVolume():
         self.sgrad_x=[]
         self.sgrad_y = []
         self.sgrad_z = []
+        self.current_signal=[]
 
 
     def getVolume(self, folder=None):
@@ -119,7 +121,7 @@ class diffVolume():
             temp_vec = []
             for bvec in bvecs: #this is each vector in shell
                 r, theta, phi=dipy.core.sphere.cart2sphere(bvec[0],bvec[1],bvec[2])
-                #if theta > pi/2:
+                #if theta > pi/2: #this is the anitpodal port becareful whether this is on or off
                 #    theta= pi- theta
                 #    phi=phi+3.14159265
                 phi=(phi)%(2*pi)
@@ -130,6 +132,57 @@ class diffVolume():
             self.bvecs_hemi_cart.append(temp_vec)
         self.bvecs_hemi_cart=np.asarray(self.bvecs_hemi_cart)
         self.bvecs_hemi_sphere=np.asarray(self.bvecs_hemi_sphere)
+
+    def makeFlatHemisphere(self,p1,shell):
+
+        s1 = []
+        th = []
+        ph = []
+        i = 0
+        for ind in self.inds[shell]:
+            s1.append(self.img[p1[0], p1[1], p1[2], ind])
+            th.append(self.bvecs_hemi_sphere[shell][i][1])
+            ph.append(self.bvecs_hemi_sphere[shell][i][2])
+            i = i + 1
+        th = np.asarray(th)
+        ph = np.asarray(ph)
+        s1 = np.asarray(s1)
+
+        thph=np.column_stack((th,ph))
+        #interpolator=LinearNDInterpolator(thph,1/s1)
+        interpolator = NearestNDInterpolator(thph, 1 / s1)
+
+        iso=somemath.isomesh()
+        iso.get_icomesh()
+        iso.makeFlat(interpolator)
+        print(interpolator(th,ph))
+        return iso.s_flat
+
+    def plotSignal(self,p1,shell):
+        N=64
+        sphere_sig=somemath.sphereSig()
+        theta = np.linspace(0, np.pi, N)
+        phi = np.linspace(0, 2 * np.pi, N)
+        theta, phi = np.meshgrid(theta,phi)
+        s1 = []
+        th = []
+        ph = []
+        i=0
+        for ind in self.inds[shell]:
+            s1.append(self.img[p1[0], p1[1], p1[2], ind])
+            th.append(self.bvecs_hemi_sphere[shell][i][1])
+            ph.append(self.bvecs_hemi_sphere[shell][i][2])
+            i = i + 1
+        th = np.asarray(th)
+        ph = np.asarray(ph)
+        s1 = np.asarray(s1)
+        print(s1)
+        ss1 = griddata((th, ph), 1/s1, (theta, phi), method='nearest')  # , fill_value=-1)
+        sphere_sig.grid = np.real(ss1)
+        sphere_sig.N=N
+        #sphere_sig.plot()
+        self.current_signal=sphere_sig
+        plt.imshow(sphere_sig.grid)
 
     def conv(self,p1,p2,N,shellN,tN=None):
         """
