@@ -138,8 +138,14 @@ class diffVolume():
         s1 = []
         th = []
         ph = []
+        x=[]
+        y=[]
+        z=[]
         i = 0
         for ind in self.inds[shell]:
+            x.append(self.bvecs_hemi_cart[shell][i][0])
+            y.append(self.bvecs_hemi_cart[shell][i][1])
+            z.append(self.bvecs_hemi_cart[shell][i][2])
             s1.append(self.img[p1[0], p1[1], p1[2], ind])
             th.append(self.bvecs_hemi_sphere[shell][i][1])
             ph.append(self.bvecs_hemi_sphere[shell][i][2])
@@ -147,15 +153,21 @@ class diffVolume():
         th = np.asarray(th)
         ph = np.asarray(ph)
         s1 = np.asarray(s1)
+        x = np.asarray(x)
+        y = np.asarray(y)
+        z = np.asarray(z)
+
 
         thph=np.column_stack((th,ph))
+        xyz = np.column_stack((x, y, z))
         #interpolator=LinearNDInterpolator(thph,1/s1)
-        interpolator = NearestNDInterpolator(thph, 1 / s1)
+        #interpolator = NearestNDInterpolator(thph, 1 / s1)
+        interpolator = NearestNDInterpolator(xyz, 1 / s1)
 
         iso=somemath.isomesh()
         iso.get_icomesh()
         iso.makeFlat(interpolator)
-        print(interpolator(th,ph))
+        #print(interpolator(th,ph))
         return iso.s_flat
 
     def plotSignal(self,p1,shell):

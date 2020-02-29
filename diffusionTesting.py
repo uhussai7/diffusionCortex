@@ -23,63 +23,64 @@ from scipy.interpolate import LinearNDInterpolator
 from scipy.interpolate import SmoothSphereBivariateSpline
 
 
-# dvol=diffusion.diffVolume()
-# #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
+dvol=diffusion.diffVolume()
+dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
 # dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
 # #dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Phantom") #phantom
 # #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
-# dvol.shells()
-# test=dvol.makeFlatHemisphere([91,100,97],3)
-# plt.imshow(test)
+dvol.shells()
+test=dvol.makeFlatHemisphere([91,100,97],3)
+plt.imshow(test)
+plt.show()
 # dvol.plotSignal([91,100,97],3)
 # test1=dvol.makeFlatHemisphere([47,33,1],3)
 
 ##TEst the hemisphere flatening
-iso=somemath.isomesh()
-iso.get_icomesh()
-
-theta=[]
-phi=[]
-s=[]
-x=[]
-y=[]
-z=[]
-for c in range(0,1):
-    for i in range(0,2):
-        d=0
-        for point in iso.Points[c][i]:
-            r, theta_t, phi_t = cart2sphere(point[0],point[1],point[2])
-            x.append(point[0])
-            y.append(point[1])
-            z.append(point[2])
-            theta.append(theta_t)
-            phi.append(phi_t)
-            s.append(c + i/10 + d/100)
-            theta.append(np.pi-theta_t)
-            phi.append(phi_t+np.pi)
-            x_t,y_t,z_t=sphere2cart(1,np.pi-theta_t,phi_t+np.pi)
-            x.append(x_t)
-            y.append(y_t)
-            z.append(z_t)
-            s.append(c + i / 10 + d / 100)
-            d=d+1
-
-
-th = np.asarray(theta)
-ph = np.asarray(phi)
-s = np.asarray(s)
-
-thph=np.column_stack((th,ph))
-xyz=np.column_stack((x,y,z))
-interpolator=LinearNDInterpolator(thph,s)
-#interpolator = LinearNDInterpolator(thph, s)
-#interpolator=SmoothSphereBivariateSpline(th,ph,s)
-interpolator=NearestNDInterpolator(xyz,s)
-
-iso.makeFlat(interpolator)
-
-plt.imshow(iso.s_flat)
-
+# iso=somemath.isomesh()
+# iso.get_icomesh()
+#
+# theta=[]
+# phi=[]
+# s=[]
+# x=[]
+# y=[]
+# z=[]
+# for c in range(0,1):
+#     for i in range(0,2):
+#         d=0
+#         for point in iso.Points[c][i]:
+#             r, theta_t, phi_t = cart2sphere(point[0],point[1],point[2])
+#             x.append(point[0])
+#             y.append(point[1])
+#             z.append(point[2])
+#             theta.append(theta_t)
+#             phi.append(phi_t)
+#             s.append(c + i/10 + d/100)
+#             theta.append(np.pi-theta_t)
+#             phi.append(phi_t+np.pi)
+#             x_t,y_t,z_t=sphere2cart(1,np.pi-theta_t,phi_t+np.pi)
+#             x.append(x_t)
+#             y.append(y_t)
+#             z.append(z_t)
+#             s.append(c + i / 10 + d / 100)
+#             d=d+1
+#
+#
+# th = np.asarray(theta)
+# ph = np.asarray(phi)
+# s = np.asarray(s)
+#
+# thph=np.column_stack((th,ph))
+# xyz=np.column_stack((x,y,z))
+# interpolator=LinearNDInterpolator(thph,s)
+# #interpolator = LinearNDInterpolator(thph, s)
+# #interpolator=SmoothSphereBivariateSpline(th,ph,s)
+# interpolator=NearestNDInterpolator(xyz,s)
+#
+# iso.makeFlat(interpolator)
+#
+# plt.imshow(iso.s_flat)
+# plt.show()
 # #so3=dvol.conv([47,33,3],[47,33,4],32,4,tN=5) #orhtogonal white matter
 # # #so3=dvol.conv([103,73,97],[100,73,96],32,4) #cortex superficial deep
 # so3.makeNii('test',3)
