@@ -78,7 +78,7 @@ interpolator=NearestNDInterpolator(xyz,s)
 
 iso.makeFlat(interpolator)
 
-
+plt.imshow(iso.s_flat)
 
 # #so3=dvol.conv([47,33,3],[47,33,4],32,4,tN=5) #orhtogonal white matter
 # # #so3=dvol.conv([103,73,97],[100,73,96],32,4) #cortex superficial deep

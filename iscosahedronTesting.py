@@ -131,11 +131,20 @@ class isomesh:
         width = 5*(N+1)
         self.s_flat=np.empty([height,width])
         self.s_flat[:]=0
+        ii = np.linspace(0,N-1,N)
+        jj = np.linspace(0, N - 1, N)
+        jjj,iii = np.meshgrid(ii,jj)
+        jjj=np.flip(jjj)
+        iii=np.transpose(iii)
+        jjj=np.transpose(jjj)
+
         for c in range(0,5):
-            for i in range(0,N):
-                for j in range(0,N):
-                    I=i
-                    J=(N+1)*c + j + 1
+            for ii in range(0,N):
+                for jj in range(0,N):
+                    I=ii
+                    J=(N+1)*c + jj + 1
+                    i=iii(ii,jj)
+                    j=jjj(ii, jj)
                     self.s_flat[I,J]=self.cij2thetaphi(c,i,j)
 
     def cij2thetaphi(self,c,i,j):

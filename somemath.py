@@ -597,13 +597,21 @@ class isomesh:
         N= m+1
         height = N+1
         width = 5*(N+1)
+        ii = np.linspace(0, N - 1, N)
+        jj = np.linspace(0, N - 1, N)
+        jjj, iii = np.meshgrid(ii, jj)
+        jjj = np.flip(jjj)
+        iii = np.transpose(iii)
+        jjj = np.transpose(jjj)
         self.s_flat=np.empty([height,width])
         self.s_flat[:]=0
         for c in range(0,5):
-            for i in range(0,N):
-                for j in range(0,N):
-                    I=i
-                    J=(N+1)*c + j + 1
+            for ii in range(0,N):
+                for jj in range(0,N):
+                    I=ii
+                    J=(N+1)*c + jj + 1
+                    i = iii[ii, jj]
+                    j = jjj[ii, jj]
                     theta,phi = self.cij2thetaphi(c, i, j)
                     x_t, y_t, z_t = sphere2cart(1,theta,phi)
                     #val1=interpolator(theta,phi)
@@ -612,6 +620,12 @@ class isomesh:
                     #val2=interpolator(np.pi-theta,phi+np.pi)
                     val2 = interpolator(x_t, y_t, z_t)
                     self.s_flat[I,J]= 0.5*(val1+val2)
+        for c in range(0,5): #padding
+            ct=c-1
+            print((N+1)*ct+1)
+            print((N+1)*ct+4)
+            self.s_flat[1:N,c*(N+1)] = self.s_flat[1,(N+1)*ct+1:(N+1)*ct+5]
+
 
     def cij2thetaphi(self,c,i,j):
         v=int(self.mat2mesh(i,j))
