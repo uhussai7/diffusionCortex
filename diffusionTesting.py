@@ -23,6 +23,7 @@ from scipy.interpolate import LinearNDInterpolator
 from scipy.interpolate import SmoothSphereBivariateSpline
 
 
+
 dvol=diffusion.diffVolume()
 dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
 # dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
@@ -32,6 +33,18 @@ dvol.shells()
 test=dvol.makeFlatHemisphere([91,100,97],3)
 plt.imshow(test)
 plt.show()
+
+
+#try keras here
+from keras.models import Sequential
+
+
+
+
+
+
+
+
 # dvol.plotSignal([91,100,97],3)
 # test1=dvol.makeFlatHemisphere([47,33,1],3)
 
