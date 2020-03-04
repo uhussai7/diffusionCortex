@@ -205,3 +205,7 @@ vis.addVector()
 # # # #
 # # # plt.hist2d(disp[surf], curv[surf],bins=1000, range=[[0,2],[-0.1,0.1]])
 # # # plt.show()
+
+
+
+

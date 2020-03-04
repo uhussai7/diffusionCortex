@@ -67,6 +67,13 @@ def loadVol(filename=None, **kwargs):
     print("loading: " + filename)
     return nibabel.load(filename)
 
+def loadgetVol(filename=None, **kwargs):
+    if filename is None:
+        raise ValueError("Please provide filename, filename=...")
+    print("loading: " + filename)
+    temp=nibabel.load(filename)
+    return temp.get_data()
+
 def loadDiffVol(folder=None, **kwargs):
     if folder is None:
         raise ValueError("Please provide diffusion folder path, folder=...")

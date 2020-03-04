@@ -492,6 +492,7 @@ class isomesh:
         self.testStrip=np.empty([self.m+1,self.m+1]) #note that this is a half strip
         self.sphereFunction=np.empty([5,2,100])
         self.s_flat=[]
+        self.new_s_flat=[]
 
     def get_icomesh(self):
         geodesic.get_icosahedron(self.vertices, self.faces)
@@ -622,12 +623,17 @@ class isomesh:
                     self.s_flat[I,J]= 0.5*(val1+val2)
         for c in range(0,5): #padding
             ct=c-1
-            print((N+1)*ct+1)
-            print((N+1)*ct+4)
+            #print((N+1)*ct+1)
+            #print((N+1)*ct+4)
             self.s_flat[1:N,c*(N+1)] = self.s_flat[1,(N+1)*ct+1:(N+1)*ct+5]
             ct=(c+2)%N
             self.s_flat[N,(N+1)*c+1:(N+1)*c+5] =np.flip(self.s_flat[1:N,(ct+1)*(N+1)-2])
 
+        stacks=np.empty([N+1,N+1,5])
+        self.new_s_flat=np.empty([5*(N+1),N+1])
+        for c in range(0,5): #do a re-stack to be consistent with taco
+            stacks[:,:,c]=self.s_flat[0:N+1,c*(N+1):c*(N+1)+N+1]
+            self.new_s_flat[-(N+1)*(c+1):5*(N+1)-c*(N+1),:]=self.s_flat[0:N+1,c*(N+1):c*(N+1)+N+1]
 
     def cij2thetaphi(self,c,i,j):
         v=int(self.mat2mesh(i,j))

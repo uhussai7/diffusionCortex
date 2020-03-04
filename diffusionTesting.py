@@ -21,32 +21,100 @@ from dipy.core.sphere import sphere2cart
 from scipy.interpolate import NearestNDInterpolator
 from scipy.interpolate import LinearNDInterpolator
 from scipy.interpolate import SmoothSphereBivariateSpline
+import random
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, Flatten
 
-
-
+#fresh testing
 dvol=diffusion.diffVolume()
-dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
+dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
+dvol.shells()
+dti=diffusion.dti()
+dti.load("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\Diffusion\\dti")
+mask=dvol.mask.get_data()
+i,j,k=np.where(mask ==1)
+
+#Choose 10000 voxels for training and 1000 for testing?
+Ntrain=1000
+Ntest=100
+N=Ntrain+Ntest
+all_inds=random.sample(range(N),N)
+train_inds=all_inds[0:Ntrain]
+test_inds=all_inds[Ntrain:N]
+
+X_train=np.empty([Ntrain,6,30,3])
+X_test=np.empty([Ntest,6,30,3])
+Y_train=np.empty([Ntrain,10])  #V1x3, V2X3, FA, Lx3
+Y_test=np.empty([Ntest,10])
+t=0
+for ind in train_inds:
+    p = [i[ind], j[ind], k[ind]]
+    for shell in range(1,4):
+        X_train[t,:,:,shell-1]=dvol.makeFlatHemisphere(p,shell)
+    t=t+1
+t = 0
+for ind in test_inds:
+    p = [i[ind], j[ind], k[ind]]
+    for shell in range(1, 4):
+        X_test[t, :, :, shell - 1] = dvol.makeFlatHemisphere(p, shell)
+    t = t + 1
+t=0
+for ind in train_inds:
+    #p = [i[ind], j[ind], k[ind]]
+    Y_train[t, 0] = dti.FA[i[ind], j[ind], k[ind]]
+    Y_train[t, 1] = dti.L1[i[ind], j[ind], k[ind]]
+    Y_train[t, 2] = dti.L2[i[ind], j[ind], k[ind]]
+    Y_train[t, 3] = dti.L3[i[ind], j[ind], k[ind]]
+    Y_train[t, 4] = dti.V1[i[ind], j[ind], k[ind],0]
+    Y_train[t, 5] = dti.V1[i[ind], j[ind], k[ind],1]
+    Y_train[t, 6] = dti.V1[i[ind], j[ind], k[ind],2]
+    Y_train[t, 7] = dti.V2[i[ind], j[ind], k[ind],0]
+    Y_train[t, 8] = dti.V2[i[ind], j[ind], k[ind],1]
+    Y_train[t, 9] = dti.V2[i[ind], j[ind], k[ind],2]
+    t=t+1
+t=0
+for ind in test_inds:
+    #p = [i[ind], j[ind], k[ind]]
+    Y_test[t, 0] = dti.FA[i[ind], j[ind], k[ind]]
+    Y_test[t, 1] = dti.L1[i[ind], j[ind], k[ind]]
+    Y_test[t, 2] = dti.L2[i[ind], j[ind], k[ind]]
+    Y_test[t, 3] = dti.L3[i[ind], j[ind], k[ind]]
+    Y_test[t, 4] = dti.V1[i[ind], j[ind], k[ind],0]
+    Y_test[t, 5] = dti.V1[i[ind], j[ind], k[ind],1]
+    Y_test[t, 6] = dti.V1[i[ind], j[ind], k[ind],2]
+    Y_test[t, 7] = dti.V2[i[ind], j[ind], k[ind],0]
+    Y_test[t, 8] = dti.V2[i[ind], j[ind], k[ind],1]
+    Y_test[t, 9] = dti.V2[i[ind], j[ind], k[ind],2]
+    t=t+1
+
+
+#cnn stuff
+model = Sequential() #model
+
+model.add(Conv2D(64,kernel_size=3,activation='relu', input_shape= (6,30,3)))
+model.add(Conv2D(32,kernel_size=3,activation='relu'))
+#model.add(Conv2D(2,kernel_size=3,activation='relu'))
+model.add(Flatten())
+model.add(Dense(10,activation='linear'))
+
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+
+model.fit(X_train,Y_train, epochs=100)
+
+# dvol=diffusion.diffVolume()
+# #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
 # dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\\Diffusion")
 # #dvol.getVolume("C:\\Users\\uhussain\\Documents\\ShareVM\\Phantom") #phantom
-# #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
-dvol.shells()
-test=dvol.makeFlatHemisphere([91,100,97],3)
-plt.imshow(test)
-plt.show()
-
-
-#try keras here
-from keras.models import Sequential
-
-
-
-
-
-
-
-
-# dvol.plotSignal([91,100,97],3)
-# test1=dvol.makeFlatHemisphere([47,33,1],3)
+# # #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")
+# dvol.shells()
+# #test=dvol.makeFlatHemisphere([91,100,97],3)
+# test=dvol.makeFlatHemisphere([47,33,4],3)
+# plt.imshow(test)
+# plt.show()
+# dti=diffusion.dti()
+# dti.load("C:\\Users\\uhussain\\Documents\\ShareVM\\Cortex\\101006\\Diffusion\Diffusion\\dti")
+# # dvol.plotSignal([91,100,97],3)
+# # test1=dvol.makeFlatHemisphere([47,33,1],3)
 
 ##TEst the hemisphere flatening
 # iso=somemath.isomesh()

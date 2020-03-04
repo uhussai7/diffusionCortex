@@ -25,6 +25,35 @@ class diff2d():
         shape=img.shape
         img=img.reshape((shape[0]*shape[1]*shape[2],shape[3]),order='F')
 
+class dti():
+    def __init__(self):
+        self.FA=[]
+        self.L1=[]
+        self.L2=[]
+        self.L3=[]
+        self.V1=[]
+        self.V2=[]
+        self.V3=[]
+        self.MD = []
+        self.MO = []
+        self.S0 = []
+        self.mask= []
+
+    def load(self,pathprefix):
+        if pathprefix is None:
+            raise ValueError("Please provide path including prefix for dti data, prefix=...")
+        self.FA = ioFunctions.loadgetVol(pathprefix+"_FA.nii.gz")
+        self.L1 = ioFunctions.loadgetVol(pathprefix + "_L1.nii.gz")
+        self.L2 = ioFunctions.loadgetVol(pathprefix + "_L2.nii.gz")
+        self.L3 = ioFunctions.loadgetVol(pathprefix + "_L3.nii.gz")
+        self.V1 = ioFunctions.loadgetVol(pathprefix + "_V1.nii.gz")
+        self.V2 = ioFunctions.loadgetVol(pathprefix + "_V2.nii.gz")
+        self.V3 = ioFunctions.loadgetVol(pathprefix + "_V3.nii.gz")
+
+    #def y(self,p):
+     #   v=[]
+
+
 
 class diffVolume():
     def __init__(self):
@@ -45,6 +74,7 @@ class diffVolume():
         self.sgrad_y = []
         self.sgrad_z = []
         self.current_signal=[]
+        self.mask=[]
 
 
     def getVolume(self, folder=None):
@@ -55,6 +85,7 @@ class diffVolume():
         """
         self.vol, self.gtab =ioFunctions.loadDiffVol(folder=folder)
         self.img = self.vol.get_data()
+        self.mask = ioFunctions.loadVol(filename=folder+"\\nodif_brain_mask.nii.gz")
 
     def makeInterpolator(self):
         """
@@ -134,7 +165,7 @@ class diffVolume():
         self.bvecs_hemi_sphere=np.asarray(self.bvecs_hemi_sphere)
 
     def makeFlatHemisphere(self,p1,shell):
-
+        s0 = []
         s1 = []
         th = []
         ph = []
@@ -157,12 +188,18 @@ class diffVolume():
         y = np.asarray(y)
         z = np.asarray(z)
 
+        for ind in self.inds[shell]:
+            s0.append(self.img[p1[0], p1[1], p1[2], ind])
+        norm=sum(s0)/len(s0)
+
 
         thph=np.column_stack((th,ph))
         xyz = np.column_stack((x, y, z))
         #interpolator=LinearNDInterpolator(thph,1/s1)
         #interpolator = NearestNDInterpolator(thph, 1 / s1)
-        interpolator = NearestNDInterpolator(xyz, 1 / s1)
+        #interpolator = NearestNDInterpolator(xyz, s1/norm)
+        interpolator = LinearNDInterpolator(xyz, s1/norm)
+
 
         iso=somemath.isomesh()
         iso.get_icomesh()
