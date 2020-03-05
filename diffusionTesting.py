@@ -23,7 +23,9 @@ from scipy.interpolate import LinearNDInterpolator
 from scipy.interpolate import SmoothSphereBivariateSpline
 import random
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Flatten
+from tensorflow.keras.layers import Dense, Conv2D, Flatten, MaxPooling2D
+from numpy import save
+from numpy import load
 
 #fresh testing
 dvol=diffusion.diffVolume()
@@ -35,8 +37,8 @@ mask=dvol.mask.get_data()
 i,j,k=np.where(mask ==1)
 
 #Choose 10000 voxels for training and 1000 for testing?
-Ntrain=1000
-Ntest=100
+Ntrain=25000
+Ntest=2500
 N=Ntrain+Ntest
 all_inds=random.sample(range(N),N)
 train_inds=all_inds[0:Ntrain]
@@ -87,19 +89,61 @@ for ind in test_inds:
     Y_test[t, 9] = dti.V2[i[ind], j[ind], k[ind],2]
     t=t+1
 
+save('X_train.npy',X_train)
+save('Y_train.npy',Y_train)
+save('X_test.npy',X_test)
+save('Y_test.npy',Y_test)
 
-#cnn stuff
+
+X_train=load('X_train.npy')
+Y_train=load('Y_train.npy')
+X_test=load('X_test.npy')
+Y_test=load('Y_test.npy')
+
+
+
+
+Y_train_hold=Y_train
+# #
+Y_train = Y_train_hold[:,0:4]
+Y_train[:,0]=10*Y_train[:,0]
+Y_train[:,1:4]=1000*Y_train[:,1:4]
+# #Y_train=np.empty([Ntrain,6])
+# t=0
+# for one_train in Y_train_hold:
+#     x=  one_train[4]
+#     y = one_train[5]
+#     z = one_train[6]
+#     throw, th1, ph1=cart2sphere(x,y,z)
+#     Y_train[t,4]=th1
+#     Y_train[t, 5] = ph1
+#     t=t+1
+#
+# #cnn stuff
+#
 model = Sequential() #model
-
 model.add(Conv2D(64,kernel_size=3,activation='relu', input_shape= (6,30,3)))
+#model.add(Conv2D(1,kernel_size=3,activation='relu'))
+#model.add(Conv2D(8,kernel_size=3,activation='relu'))
 model.add(Conv2D(32,kernel_size=3,activation='relu'))
 #model.add(Conv2D(2,kernel_size=3,activation='relu'))
+#model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Flatten())
-model.add(Dense(10,activation='linear'))
-
-model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
-
-model.fit(X_train,Y_train, epochs=100)
+model.add(Dense(4,activation='relu'))
+#model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+model.compile(optimizer='adam', loss='mean_squared_logarithmic_error', metrics=['accuracy'])
+model.fit(X_train,Y_train, epochs=50)
+# #
+pred_test=model.predict(X_test)
+test=np.copy(Y_test[:,0:4])
+test[:,0]=10*test[:,0]
+test[:,1:4]=1000*test[:,1:4]
+# #
+percent_diff=pred_test-test
+percent_diff=percent_diff/test
+for kk in range(0,Ntest):
+      for tt in range(0,4):
+          percent_diff[kk,tt]=100*(pred_test[kk,tt]-test[kk,tt])/test[kk,tt]
 
 # dvol=diffusion.diffVolume()
 # #dvol.getVolume("K:\\Datasets\\HCP_diffusion\\101006\\Diffusion\\Diffusion")

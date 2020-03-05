@@ -188,7 +188,8 @@ class diffVolume():
         y = np.asarray(y)
         z = np.asarray(z)
 
-        for ind in self.inds[shell]:
+
+        for ind in self.inds[0]:
             s0.append(self.img[p1[0], p1[1], p1[2], ind])
         norm=sum(s0)/len(s0)
 
@@ -197,8 +198,8 @@ class diffVolume():
         xyz = np.column_stack((x, y, z))
         #interpolator=LinearNDInterpolator(thph,1/s1)
         #interpolator = NearestNDInterpolator(thph, 1 / s1)
-        #interpolator = NearestNDInterpolator(xyz, s1/norm)
-        interpolator = LinearNDInterpolator(xyz, s1/norm)
+        interpolator = NearestNDInterpolator(xyz, s1/norm)
+        #interpolator = LinearNDInterpolator(xyz, s1/norm)
 
 
         iso=somemath.isomesh()

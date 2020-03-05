@@ -625,9 +625,9 @@ class isomesh:
             ct=c-1
             #print((N+1)*ct+1)
             #print((N+1)*ct+4)
-            self.s_flat[1:N,c*(N+1)] = self.s_flat[1,(N+1)*ct+1:(N+1)*ct+5]
+            self.s_flat[1:N,c*(N+1)] = self.s_flat[1,(N+1)*ct+1:(N+1)*c-1]
             ct=(c+2)%N
-            self.s_flat[N,(N+1)*c+1:(N+1)*c+5] =np.flip(self.s_flat[1:N,(ct+1)*(N+1)-2])
+            self.s_flat[N,(N+1)*c+1:(N+1)*c+N] =np.flip(self.s_flat[1:N,(ct+1)*(N+1)-2])
 
         stacks=np.empty([N+1,N+1,5])
         self.new_s_flat=np.empty([5*(N+1),N+1])
