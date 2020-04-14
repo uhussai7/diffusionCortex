@@ -476,7 +476,12 @@ class sphereSig():
     #     mid = int(N / 2)
     #     self.grid[mid - 2:mid + 2,] = 1
 
-
+def tophemi(th,ph):
+    ph=ph+np.pi
+    if th > np.pi/2:
+        th= np.pi - th
+        ph= (ph + np.pi) % 2*np.pi
+    return th, ph
 
 class isomesh:
     def __init__(self):
