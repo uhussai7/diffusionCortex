@@ -97,10 +97,10 @@ N=Ntrain+Ntest
 # save('Y_test.npy',Y_test)
 #
 
-X_train=load('X_train.npy')
-Y_train=load('Y_train.npy')
-X_test=load('X_test.npy')
-Y_test=load('Y_test.npy')
+X_train=load('K:\\Datasets\\DiffusionIcosahedron\\X_train.npy')
+Y_train=load('K:\\Datasets\\DiffusionIcosahedron\\Y_train.npy')
+X_test=load('K:\\Datasets\\DiffusionIcosahedron\\X_test.npy')
+Y_test=load('K:\\Datasets\\DiffusionIcosahedron\\Y_test.npy')
 
 
 
