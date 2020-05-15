@@ -5,27 +5,13 @@ from tensorflow.keras import regularizers
 from tensorflow.keras import initializers
 from tensorflow.keras import constraints
 from tensorflow.keras import activations
-
-
-# class group_d6():
-#     def __int__(self):
-#
-#     def rotate(self,kernel,angle):
-#         #keep angle an integer because the rotation angle is that same
-#
-#
-#     def reflect(self,kernel,axis):
-#         #keep axis and integer, starting from 0 clockwise
-#
-#     def conv2d(self,input,kernel):
-#         #have to differentiate between scalar or regular (thats tricky)
-#         # if input has size [batch,x,y,shells] it is scalar
-#         # if input has size [batch, x,y,shells*12] it is regular
-#         #kernel will have size [x,y,shells,filters]
+import numpy as np
+import group_d6 as d6
 
 
 
-class groupConvScalar(Layer):
+
+class groupConv(Layer):
 
     def __init__(self, filters,
                  #kernel_size,
@@ -47,7 +33,7 @@ class groupConvScalar(Layer):
         if deep is None:
             raise ValueError('Please specify whether this is a zeroth layer (deep=0)'
                              'or a deep layer (deep=1). Found `None`.')
-        super(groupConvScalar, self).__init__(**kwargs)
+        super(groupConv, self).__init__(**kwargs)
         kernel_size = 3
         rank = 2
         self.filters = filters
@@ -100,7 +86,7 @@ class groupConvScalar(Layer):
         else:
             self.bias = None
 
-        super(groupConvScalar, self).build(input_shape)  # Be sure to call this at the end
+        super(groupConv, self).build(input_shape)  # Be sure to call this at the end
 
     def call(self, inputs):
 
